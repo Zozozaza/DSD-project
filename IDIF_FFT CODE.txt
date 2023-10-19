@@ -1,0 +1,379 @@
+IDIF_FFT
+
+
+`timescale 1ns / 1ps
+
+
+module IDIF_FFT(
+
+    input wire clk,
+    input wire rst,
+    input wire [7:0] x0_real, x1_real, x2_real, x3_real, x4_real, x5_real, x6_real, x7_real, 
+    input wire [7:0] x0_img, x1_img, x2_img, x3_img, x4_img, x5_img, x6_img, x7_img,
+    output reg [7:0] y0_real, y1_real, y2_real, y3_real, y4_real, y5_real, y6_real, y7_real, 
+    output reg [7:0] y0_img, y1_img, y2_img, y3_img, y4_img, y5_img, y6_img, y7_img
+);
+
+reg [7:0] temp0_real, temp1_real, temp2_real, temp3_real, temp4_real, temp5_real, temp6_real, temp7_real;
+reg [7:0] temp0_img, temp1_img, temp2_img, temp3_img, temp4_img, temp5_img, temp6_img, temp7_img;
+reg [7:0] W_real_5,W_real_6,W_real_7; // Twiddle factor (Real part)
+reg [7:0] W_imag_5,W_imag_6,W_imag_7;
+
+reg [7:0] stage1_result0_real,stage1_result1_real, stage1_result2_real, stage1_result3_real, stage1_result4_real, stage1_result5_real, stage1_result6_real, stage1_result7_real;
+reg [7:0] stage1_result0_img,stage1_result1_img, stage1_result2_img, stage1_result3_img, stage1_result4_img, stage1_result5_img, stage1_result6_img, stage1_result7_img;
+
+reg [7:0] stage2_result0_real,stage2_result1_real, stage2_result2_real, stage2_result3_real, stage2_result4_real, stage2_result5_real, stage2_result6_real, stage2_result7_real;
+reg [7:0] stage2_result0_img,stage2_result1_img, stage2_result2_img, stage2_result3_img, stage2_result4_img, stage2_result5_img, stage2_result6_img, stage2_result7_img;
+
+reg [7:0] stage3_result0_real,stage3_result1_real, stage3_result2_real, stage3_result3_real, stage3_result4_real, stage3_result5_real, stage3_result6_real, stage3_result7_real;
+reg [7:0] stage3_result0_img,stage3_result1_img, stage3_result2_img, stage3_result3_img, stage3_result4_img, stage3_result5_img, stage3_result6_img, stage3_result7_img;
+// * When reset goes high, reset twiddle factors and outputs to 0.
+
+//solving for stage 1
+// first addition operation as W(8)0 = 1
+always @(posedge clk or posedge rst) begin
+    if (rst) begin
+        W_real_5 <= 8'b0;
+        W_imag_5 <= 8'b0;
+        W_real_6 <= 8'b0;
+        W_imag_6 <= 8'b0;
+        W_real_7 <= 8'b0;
+        W_imag_7 <= 8'b0;        
+        y1_real <= 8'b0;
+        y1_real <= 8'b0;
+        y2_real <= 8'b0;
+        y3_real <= 8'b0;
+        y4_real <= 8'b0;
+        y5_real <= 8'b0;
+        y6_real <= 8'b0;
+        y7_real <= 8'b0;
+        y0_img <= 8'b0;
+        y1_img <= 8'b0;
+        y2_img <= 8'b0;
+        y3_img <= 8'b0;
+        y4_img <= 8'b0;
+        y5_img <= 8'b0;
+        y6_img <= 8'b0;
+        y7_img <= 8'b0;
+               end
+    else
+        begin 
+        //stage 1
+        stage1_result0_real <= temp0_real;
+        stage1_result1_real <= temp1_real;
+        stage1_result2_real <= temp2_real;
+        stage1_result4_real <= temp4_real;
+        stage1_result5_real <= temp5_real;
+        stage1_result6_real <= temp6_real;
+        
+        stage1_result0_img <= temp0_img;
+        stage1_result1_img <= temp1_img;
+        stage1_result2_img <= temp2_img;
+        stage1_result4_img <= temp4_img;
+        stage1_result5_img <= temp5_img;
+        stage1_result6_img <= temp6_img;
+        
+        //stage 2
+        stage2_result0_real <= temp0_real;
+        stage2_result1_real <= temp1_real;
+        stage2_result2_real <= temp2_real;
+        stage2_result3_real <= temp3_real;
+        stage2_result4_real <= temp4_real;
+        
+        stage2_result0_img <= temp0_img;
+        stage2_result1_img <= temp1_img;
+        stage2_result2_img <= temp2_img;
+        stage2_result3_img <= temp3_img;
+        stage2_result4_img <= temp4_img;
+               
+        y1_real <= stage3_result0_real;
+        y1_real <= stage3_result1_real;
+        y2_real <= stage3_result2_real;
+        y3_real <= stage3_result3_real;
+        y4_real <= stage3_result4_real;
+        y5_real <= stage3_result5_real;
+        y6_real <= stage3_result6_real;
+        y7_real <= stage3_result7_real;
+        y0_img <= stage3_result0_img;
+        y1_img <= stage3_result1_img;
+        y2_img <= stage3_result2_img;
+        y3_img <= stage3_result3_img;
+        y4_img <= stage3_result4_img;
+        y5_img <= stage3_result5_img;
+        y6_img <= stage3_result6_img;
+        y7_img <= stage3_result7_img;
+        end
+ end
+ 
+//stage 1
+
+adder case_add_1_0 (
+           .a_real(x0_real),
+           .a_img(x0_img),
+           .b_real(x4_real),
+           .b_img(x4_img),
+           .y_real(stage1_result0_real),
+           .y_img(stage1_result0_img)
+       );
+       
+subtraction case_sub_1_0 (
+           .a_real(x0_real),
+           .a_img(x0_img),
+           .b_real(x4_real),
+           .b_img(x4_img),
+           .y_real(stage1_result1_real),
+           .y_img(stage1_result1_img)
+       );   
+       
+adder  case_add_1_1 (
+           .a_real(x2_real),
+           .a_img(x2_img),
+           .b_real(x6_real),
+           .b_img(x6_img),
+           .y_real(stage1_result2_real),
+           .y_img(stage1_result2_img)
+       );  
+              
+subtraction case_sub_1_1 (
+           .a_real(x2_real),
+           .a_img(x2_img),
+           .b_real(x6_real),
+           .b_img(x6_img),
+           .y_real(stage1_result3_real),
+           .y_img(stage1_result3_img)
+       );   
+              
+adder case_add_1_2 (
+           .a_real(x1_real),
+           .a_img(x1_img),
+           .b_real(x5_real),
+           .b_img(x5_img),
+           .y_real(stage1_result4_real),
+           .y_img(stage1_result4_img)
+       );
+       
+subtraction case_sub_1_2 (
+           .a_real(x1_real),
+           .a_img(x1_img),
+           .b_real(x5_real),
+           .b_img(x5_img),
+           .y_real(stage1_result5_real),
+           .y_img(stage1_result5_img)
+       );
+adder case_add_1_3 (
+           .a_real(x3_real),
+           .a_img(x3_img),
+           .b_real(x7_real),
+           .b_img(x7_img),
+           .y_real(stage1_result6_real),
+           .y_img(stage1_result6_img)
+       );
+   
+
+subtraction case_sub_1_3 (
+           .a_real(x3_real),
+           .a_img(x3_img),
+           .b_real(x7_real),
+           .b_img(x7_img),
+           .y_real(stage1_result7_real),
+           .y_img(stage1_result7_img)
+       );
+twiddle_factors tw1(
+           .stage(3'b101), . w_real(W_real_5),.w_imag(W_imag_5)
+       );
+twiddle_factors tw2(
+           .stage(3'b110), . w_real(W_real_6),.w_imag(W_imag_6)
+       );
+twiddle_factors tw3(
+         .stage(3'b111), . w_real(W_real_7),.w_imag(W_imag_7)
+       );
+        
+multiplier case_mul_1_0 (
+           .a_real(stage1_result3_real),
+           .a_img(stage1_result3_img),
+           .b_real(W_real_6),
+           .b_img(W_imag_6),
+           .y_real(temp3_real),
+           .y_img(temp3_img)
+                );
+                
+multiplier case_mul_1_1 (
+           .a_real(stage1_result7_real),
+           .a_img(stage1_result7_img),
+           .b_real(W_real_6),
+           .b_img(W_imag_6),
+           .y_real(temp7_real),
+           .y_img(temp7_img)
+                 );
+       
+//stage 2
+adder case_add_2_0 (
+           .a_real(temp0_real),
+           .a_img(temp0_img),
+           .b_real(temp2_real),
+           .b_img(temp2_img),
+           .y_real(stage2_result0_real),
+           .y_img(stage2_result0_img)    
+                  );
+                  
+adder case_add_2_1 (
+           .a_real(temp1_real),
+           .a_img(temp1_img),
+           .b_real(temp3_real),
+           .b_img(temp3_img),
+           .y_real(stage2_result1_real),
+           .y_img(stage2_result1_img)
+                  ); 
+                  
+subtraction case_sub_2_0 (
+           .a_real(temp0_real),
+           .a_img(temp0_img),
+           .b_real(temp2_real),
+           .b_img(temp2_img),
+           .y_real(stage2_result2_real),
+           .y_img(stage2_result2_img)
+                            );
+
+subtraction case_sub_2_1 (
+           .a_real(temp1_real),
+           .a_img(temp1_img),
+           .b_real(temp3_real),
+           .b_img(temp3_img),
+           .y_real(stage2_result3_real),
+           .y_img(stage2_result3_img)
+               );
+                     
+adder case_add_2_2 (
+           .a_real(temp4_real),
+           .a_img(temp4_img),
+           .b_real(temp6_real),
+           .b_img(temp6_img),
+           .y_real(stage2_result4_real),
+           .y_img(stage2_result4_img)
+               );
+                      
+adder case_add_2_3 (
+           .a_real(temp5_real),
+           .a_img(temp5_img),
+           .b_real(temp7_real),
+           .b_img(temp7_img),
+           .y_real(stage2_result5_real),
+           .y_img(stage2_result5_img)
+                );   
+
+subtraction case_sub_2_2(
+           .a_real(temp4_real),
+           .a_img(temp4_img),
+           .b_real(temp6_real),
+           .b_img(temp6_img),
+           .y_real(stage2_result6_real),
+           .y_img(stage2_result6_img)                 
+                );    
+subtraction case_sub_2_3 (
+           .a_real(temp5_real),
+           .a_img(temp5_img),
+           .b_real(temp7_real),
+           .b_img(temp7_img),
+           .y_real(stage2_result7_real),
+           .y_img(stage2_result7_img)
+                 );
+                 
+multiplier case_mul_2_0 (
+           .a_real(stage2_result5_real),
+           .a_img(stage2_result5_img),
+           .b_real(W_real_5),
+           .b_img(W_imag_5),
+           .y_real(temp5_real),
+           .y_img(temp5_img)
+                );
+                
+multiplier case_mul_2_1(
+           .a_real(stage2_result6_real),
+           .a_img(stage2_result6_img),
+           .b_real(W_real_6),
+           .b_img(W_imag_6),
+           .y_real(temp6_real),
+           .y_img(temp6_img)
+                 );
+
+multiplier case_mul_2_2(
+           .a_real(stage2_result7_real),
+           .a_img(stage2_result7_img),
+           .b_real(W_real_7),
+           .b_img(W_imag_7),
+           .y_real(temp7_real),
+           .y_img(temp7_img)
+              );
+             
+adder case_add_3_0 (
+           .a_real(temp0_real),
+           .a_img(temp0_img),
+           .b_real(temp4_real),
+           .b_img(temp4_img),
+           .y_real(stage3_result0_real),
+           .y_img(stage3_result0_img)
+              );
+         
+adder case_add_3_1 (
+           .a_real(temp1_real),
+           .a_img(temp1_img),
+           .b_real(temp5_real),
+           .b_img(temp5_img),
+           .y_real(stage3_result1_real),
+           .y_img(stage3_result1_img)
+              );
+
+adder case_add_3_2 (
+           .a_real(temp2_real),
+           .a_img(temp2_img),
+           .b_real(temp6_real),
+           .b_img(temp6_img),
+           .y_real(stage3_result2_real),
+           .y_img(stage3_result2_img) 
+             );
+             
+adder case_add_3_3 (
+           .a_real(temp3_real),
+           .a_img(temp3_img),
+           .b_real(temp7_real),
+           .b_img(temp7_img),
+           .y_real(stage3_result3_real),
+           .y_img(stage3_result3_img) 
+             ); 
+subtraction case_sub_3_0 (
+           .a_real(temp0_real),
+           .a_img(temp0_img),
+           .b_real(temp4_real),
+           .b_img(temp4_img),
+           .y_real(stage3_result4_real),
+           .y_img(stage3_result4_img)
+              );
+                      
+subtraction case_sub_3_1 (
+           .a_real(temp1_real),
+           .a_img(temp1_img),
+           .b_real(temp5_real),
+           .b_img(temp5_img),
+           .y_real(stage3_result5_real),
+           .y_img(stage3_result5_img)
+             );
+             
+subtraction case_sub_3_2 (
+           .a_real(temp2_real),
+           .a_img(temp2_img),
+           .b_real(temp6_real),
+           .b_img(temp6_img),
+           .y_real(stage3_result6_real),
+           .y_img(stage3_result6_img) 
+              );
+                          
+subtraction case_sub_3_3 (
+           .a_real(temp1_real),
+           .a_img(temp1_img),
+           .b_real(temp5_real),
+           .b_img(temp5_img),
+           .y_real(stage3_result1_real),
+           .y_img(stage3_result1_img) 
+              ); 
+            
+    endmodule
