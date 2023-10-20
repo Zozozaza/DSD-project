@@ -1,0 +1,15 @@
+ncelab(64): 15.20-s086: (c) Copyright 1995-2020 Cadence Design Systems, Inc.
+adder case_add_1_0 (
+                 |
+ncelab: *E,CUVMUR (./DIT-FFT CODE.v,107|17): instance 'tb.dut.case_add_1_0' of design unit 'adder' is unresolved in 'worklib.DIT_FFT:module'.
+subtraction case_sub_1_0 (
+                       |
+ncelab: *E,CUVMUR (./DIT-FFT CODE.v,116|23): instance 'tb.dut.case_sub_1_0' of design unit 'subtraction' is unresolved in 'worklib.DIT_FFT:module'.
+twiddle_factors tw1(
+                  |
+ncelab: *E,CUVMUR (./DIT-FFT CODE.v,178|18): instance 'tb.dut.tw1' of design unit 'twiddle_factors' is unresolved in 'worklib.DIT_FFT:module'.
+multiplier case_mul_1_0 (
+                      |
+ncelab: *E,CUVMUR (./DIT-FFT CODE.v,188|22): instance 'tb.dut.case_mul_1_0' of design unit 'multiplier' is unresolved in 'worklib.DIT_FFT:module'.
+ncelab: Memory Usage - 49.9M program + 33.1M data = 83.1M total (Peak 83.1M)
+ncelab: CPU Usage - 0.0s system + 0.0s user = 0.0s total (0.1s, 19.8% cpu)

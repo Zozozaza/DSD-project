@@ -1,0 +1,24 @@
+`timescale 1ns / 1ps
+
+
+module twiddle_factors(
+  input [2:0] stage, // Current FFT stage
+  output reg [7:0] w_real, // Twiddle factor (Real part)
+  output reg [7:0] w_imag // Twiddle factor (Imaginary part)
+);
+
+always @(*) begin
+  case (stage)
+    0: begin w_real = 8'b10000000; w_imag = 8'b00000000; end // Stage 0 twiddle factor
+    1: begin w_real = 8'b01011010; w_imag = 8'b10100101; end // Stage 1 twiddle factor
+    2: begin w_real = 8'b00000000; w_imag = 8'b11111111; end // Stage 2 twiddle factor
+    3: begin w_real = 8'b10100101; w_imag = 8'b10100101; end // Stage 3 twiddle factor
+    4: begin w_real = 8'b10100101; w_imag = 8'b10100101; end // Stage -0 twiddle factor
+    5: begin w_real = 8'b01011010; w_imag = 8'b01011010; end // Stage -1 twiddle factor
+    6: begin w_real = 8'b00000000; w_imag = 8'b10000000; end // Stage -2 twiddle factor
+    7: begin w_real = 8'b10100101; w_imag = 8'b01011010; end // Stage -3 twiddle factor
+    default: begin w_real = 8'b00000000; w_imag = 8'b00000000; end
+  endcase
+end
+
+endmodule
